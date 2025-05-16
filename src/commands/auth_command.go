@@ -18,6 +18,7 @@ type AuthResponse struct {
 }
 
 type AuthCommand struct {
+	config        config.Config
 	loginFlags    *flag.FlagSet
 	statusFlags   *flag.FlagSet
 	loginEmail    *string
@@ -25,10 +26,16 @@ type AuthCommand struct {
 }
 
 func NewAuthCommand() AuthCommand {
+	config, err := config.LoadConfig()
+	if err != nil {
+		fmt.Errorf("Error loading config file: %v", err)
+	}
+
 	loginFlags := flag.NewFlagSet("login", flag.ExitOnError)
 	statusFlags := flag.NewFlagSet("status", flag.ExitOnError)
 
 	return AuthCommand{
+		config:        config,
 		loginFlags:    loginFlags,
 		statusFlags:   statusFlags,
 		loginEmail:    loginFlags.String("email", "", "Account email address"),
@@ -72,7 +79,7 @@ func (c AuthCommand) Exec() {
 	}
 
 	if c.statusFlags.Parsed() {
-		authStatus()
+		c.authStatus()
 	}
 
 	return
@@ -91,32 +98,31 @@ func (c AuthCommand) login() {
 		}
 	}
 
-	token, err := requestToken(*c.loginEmail, password)
+	token, err := c.requestToken(password)
 	if err != nil {
 		log.Fatalf("Error requesting auth token: %v", err)
 	}
 
-	err = saveToken(*c.loginEmail, token)
+	err = c.saveToken(token)
 	if err != nil {
 		log.Fatalf("Error saving config file: %v", err)
 	}
 }
 
-func saveToken(email, token string) error {
-	var config config.Config
-	config.Auth.Email = email
-	config.Auth.Token = token
+func (c AuthCommand) saveToken(token string) error {
+	c.config.Auth.Email = *c.loginEmail
+	c.config.Auth.Token = token
 
-	return config.Save()
+	return c.config.Save()
 }
 
-func requestToken(username, password string) (string, error) {
+func (c AuthCommand) requestToken(password string) (string, error) {
 	data := url.Values{
-		"username": {username},
+		"username": {*c.loginEmail},
 		"password": {password},
 	}
 
-	url := "http://api:4141/nsiapi/login"
+	url := fmt.Sprintf("%s/login", c.config.Api.UrlRoot)
 	req, err := http.PostForm(url, data)
 	if err != nil {
 		return "", err
@@ -144,17 +150,12 @@ func getPassword() (string, error) {
 	return password, nil
 }
 
-func authStatus() {
+func (c AuthCommand) authStatus() {
 	log.Println("checking auth status...")
 
-	config, err := config.LoadConfig()
-	if err != nil {
-		log.Fatalf("Error loading config file: %v", err)
-	}
-
-	if config.Auth.Token == "" {
+	if c.config.Auth.Token == "" {
 		fmt.Printf("Not currently logged in.")
 	} else {
-		fmt.Printf("Logged into account %s\n", config.Auth.Email)
+		fmt.Printf("Logged into account %s\n", c.config.Auth.Email)
 	}
 }

@@ -10,10 +10,17 @@ import (
 var CONFIG_FILE = "/etc/nsi/nsi-cli.toml"
 
 type Config struct {
-	Auth struct {
-		Email string `toml:"email"`
-		Token string `toml:"token"`
-	}
+	Api  ApiConfig  `toml:"api"`
+	Auth AuthConfig `toml:"auth"`
+}
+
+type ApiConfig struct {
+	UrlRoot string `toml:"url_root"`
+}
+
+type AuthConfig struct {
+	Email string `toml:"email"`
+	Token string `toml:"token"`
 }
 
 func (c Config) Save() error {
