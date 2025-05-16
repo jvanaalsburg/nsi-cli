@@ -27,10 +27,14 @@ func main() {
 	}
 
 	// Parse the rest of the command-line arguments.
-	cmd.Parse(os.Args[2:])
+	err := cmd.Parse(os.Args[2:])
+	if err != nil {
+		println(err.Error())
+		return
+	}
 
 	// Validate the command-line arguments.
-	err := cmd.Validate()
+	err = cmd.Validate()
 	if err != nil {
 		println(err.Error())
 		return
