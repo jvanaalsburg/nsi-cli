@@ -21,6 +21,7 @@ type AuthCommand struct {
 	config        config.Config
 	loginFlags    *flag.FlagSet
 	statusFlags   *flag.FlagSet
+	tokenFlags    *flag.FlagSet
 	loginEmail    *string
 	loginPassword *string
 }
@@ -33,11 +34,13 @@ func NewAuthCommand() AuthCommand {
 
 	loginFlags := flag.NewFlagSet("login", flag.ExitOnError)
 	statusFlags := flag.NewFlagSet("status", flag.ExitOnError)
+	tokenFlags := flag.NewFlagSet("token", flag.ExitOnError)
 
 	return AuthCommand{
 		config:        config,
 		loginFlags:    loginFlags,
 		statusFlags:   statusFlags,
+		tokenFlags:    tokenFlags,
 		loginEmail:    loginFlags.String("email", "", "Account email address"),
 		loginPassword: loginFlags.String("password", "", "Account password"),
 	}
@@ -55,6 +58,9 @@ func (c AuthCommand) Parse(args []string) error {
 
 	case "status":
 		c.statusFlags.Parse(args[1:])
+
+	case "token":
+		c.tokenFlags.Parse(args[1:])
 
 	default:
 		return fmt.Errorf("Invalid auth action: %s", action)
@@ -80,6 +86,10 @@ func (c AuthCommand) Exec() {
 
 	if c.statusFlags.Parsed() {
 		c.authStatus()
+	}
+
+	if c.tokenFlags.Parsed() {
+		c.authToken()
 	}
 
 	return
@@ -158,4 +168,12 @@ func (c AuthCommand) authStatus() {
 	} else {
 		fmt.Printf("Logged into account %s\n", c.config.Auth.Email)
 	}
+}
+
+func (c AuthCommand) authToken() {
+	if c.config.Auth.Token == "" {
+		log.Fatalf("No auth token found")
+	}
+
+	fmt.Print(c.config.Auth.Token)
 }
