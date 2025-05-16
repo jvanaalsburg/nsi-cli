@@ -17,9 +17,10 @@ type AuthResponse struct {
 }
 
 type AuthCommand struct {
-	loginFlags  *flag.FlagSet
-	statusFlags *flag.FlagSet
-	loginEmail  *string
+	loginFlags    *flag.FlagSet
+	statusFlags   *flag.FlagSet
+	loginEmail    *string
+	loginPassword *string
 }
 
 func NewAuthCommand() AuthCommand {
@@ -27,9 +28,10 @@ func NewAuthCommand() AuthCommand {
 	statusFlags := flag.NewFlagSet("status", flag.ExitOnError)
 
 	return AuthCommand{
-		loginFlags:  loginFlags,
-		statusFlags: statusFlags,
-		loginEmail:  loginFlags.String("email", "", "Account email address"),
+		loginFlags:    loginFlags,
+		statusFlags:   statusFlags,
+		loginEmail:    loginFlags.String("email", "", "Account email address"),
+		loginPassword: loginFlags.String("password", "", "Account password"),
 	}
 }
 
@@ -78,9 +80,14 @@ func (c AuthCommand) Exec() {
 func (c AuthCommand) login() {
 	log.Println("logging in...")
 
-	password, err := getPassword()
-	if err != nil {
-		log.Fatalf("Error getting credentials: %v", err)
+	var password string = *c.loginPassword
+
+	if password == "" {
+		var err error
+		password, err = getPassword()
+		if err != nil {
+			log.Fatalf("Error getting credentials: %v", err)
+		}
 	}
 
 	token, err := requestToken(*c.loginEmail, password)
