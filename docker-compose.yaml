@@ -1,0 +1,15 @@
+services:
+  cli:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: nsi-cli
+    volumes:
+      - ./src:/app
+    networks:
+      - nsi-net
+
+networks:
+  nsi-net:
+    name: nsi_dev_network
+    external: true
