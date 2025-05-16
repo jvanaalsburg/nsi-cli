@@ -146,4 +146,15 @@ func getPassword() (string, error) {
 
 func authStatus() {
 	log.Println("checking auth status...")
+
+	config, err := config.LoadConfig()
+	if err != nil {
+		log.Fatalf("Error loading config file: %v", err)
+	}
+
+	if config.Auth.Token == "" {
+		fmt.Printf("Not currently logged in.")
+	} else {
+		fmt.Printf("Logged into account %s\n", config.Auth.Email)
+	}
 }
