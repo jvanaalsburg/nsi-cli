@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"syscall"
 
+	"github.com/usace/nsi-cli/config"
 	"golang.org/x/term"
 )
 
@@ -95,7 +96,18 @@ func (c AuthCommand) login() {
 		log.Fatalf("Error requesting auth token: %v", err)
 	}
 
-	fmt.Printf("token: %s", token)
+	err = saveToken(*c.loginEmail, token)
+	if err != nil {
+		log.Fatalf("Error saving config file: %v", err)
+	}
+}
+
+func saveToken(email, token string) error {
+	var config config.Config
+	config.Auth.Email = email
+	config.Auth.Token = token
+
+	return config.Save()
 }
 
 func requestToken(username, password string) (string, error) {
