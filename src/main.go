@@ -21,6 +21,9 @@ func main() {
 	case "auth":
 		cmd = commands.NewAuthCommand()
 
+	case "users":
+		cmd = commands.NewUsersCommand()
+
 	default:
 		fmt.Printf("%q is not a valid command\n", os.Args[1])
 		os.Exit(2)
