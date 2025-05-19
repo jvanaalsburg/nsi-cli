@@ -70,7 +70,7 @@ func (c UsersCommand) findAllUsers() {
 		log.Fatalf("Error fetching user records: %v", err)
 	}
 
-	fmt.Printf(users)
+	fmt.Printf(api.ResponseStr(users))
 }
 
 func (c UsersCommand) findUser() {
@@ -79,5 +79,5 @@ func (c UsersCommand) findUser() {
 		log.Fatalf("Error fetching user record: %v", err)
 	}
 
-	fmt.Printf(user)
+	fmt.Printf(api.ResponseStr(user))
 }
