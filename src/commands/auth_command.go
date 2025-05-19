@@ -26,12 +26,7 @@ type AuthCommand struct {
 	loginPassword *string
 }
 
-func NewAuthCommand() AuthCommand {
-	config, err := config.LoadConfig()
-	if err != nil {
-		fmt.Errorf("Error loading config file: %v", err)
-	}
-
+func NewAuthCommand(config config.Config) AuthCommand {
 	loginFlags := flag.NewFlagSet("login", flag.ExitOnError)
 	statusFlags := flag.NewFlagSet("status", flag.ExitOnError)
 	tokenFlags := flag.NewFlagSet("token", flag.ExitOnError)

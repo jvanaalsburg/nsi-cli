@@ -16,12 +16,7 @@ type UsersCommand struct {
 	findUsersId    *string
 }
 
-func NewUsersCommand() UsersCommand {
-	config, err := config.LoadConfig()
-	if err != nil {
-		fmt.Errorf("Error loading config file: %v", err)
-	}
-
+func NewUsersCommand(config config.Config) UsersCommand {
 	listUsersFlags := flag.NewFlagSet("list", flag.ExitOnError)
 	findUsersFlags := flag.NewFlagSet("find", flag.ExitOnError)
 

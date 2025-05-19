@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/usace/nsi-cli/commands"
+	"github.com/usace/nsi-cli/config"
 )
 
 func main() {
@@ -14,15 +15,21 @@ func main() {
 		return
 	}
 
+	config, err := config.LoadConfig()
+	if err != nil {
+		fmt.Println("Error: Could not load config file")
+		os.Exit(3)
+	}
+
 	var cmd commands.Command
 
 	// Determine which sub-command should be run, and parse the remaining arguments.
 	switch os.Args[1] {
 	case "auth":
-		cmd = commands.NewAuthCommand()
+		cmd = commands.NewAuthCommand(config)
 
 	case "users":
-		cmd = commands.NewUsersCommand()
+		cmd = commands.NewUsersCommand(config)
 
 	default:
 		fmt.Printf("%q is not a valid command\n", os.Args[1])
@@ -30,7 +37,7 @@ func main() {
 	}
 
 	// Parse the rest of the command-line arguments.
-	err := cmd.Parse(os.Args[2:])
+	err = cmd.Parse(os.Args[2:])
 	if err != nil {
 		println(err.Error())
 		return
