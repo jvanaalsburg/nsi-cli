@@ -1,2 +1,3 @@
-config/nsi-cli.toml
+# Exclude config and build files.
+/config
 /bin

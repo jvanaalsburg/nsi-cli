@@ -3,11 +3,25 @@ package config
 import (
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/pelletier/go-toml"
 )
 
-var CONFIG_FILE = "/etc/nsi/nsi-cli.toml"
+func configFile() (string, error) {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return "", err
+	}
+
+	path := filepath.Join(configDir, "nsi", "nsi-cli.toml")
+	_, err = os.Stat(path)
+	if err != nil {
+		return "", err
+	}
+
+	return path, nil
+}
 
 type Config struct {
 	Api  ApiConfig  `toml:"api"`
@@ -29,7 +43,12 @@ func (c Config) Save() error {
 		return err
 	}
 
-	f, err := os.Create(CONFIG_FILE)
+	filename, err := configFile()
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Create(filename)
 	if err != nil {
 		return err
 	}
@@ -41,7 +60,12 @@ func (c Config) Save() error {
 }
 
 func LoadConfig() (Config, error) {
-	f, err := os.Open(CONFIG_FILE)
+	filename, err := configFile()
+	if err != nil {
+		return Config{}, err
+	}
+
+	f, err := os.Open(filename)
 	if err != nil {
 		return Config{}, err
 	}

@@ -6,8 +6,8 @@ services:
     image: nsi-cli
     volumes:
       - ./src:/app
-      - ./config:/etc/nsi
       - ./bin:/app/bin
+      - ./config/nsi-cli.dev.toml:/root/.config/nsi/nsi-cli.toml
     networks:
       - nsi-net
 
