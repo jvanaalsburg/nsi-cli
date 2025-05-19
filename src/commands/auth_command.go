@@ -5,10 +5,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"net/url"
 	"syscall"
 
+	"github.com/usace/nsi-cli/api"
 	"github.com/usace/nsi-cli/config"
 	"golang.org/x/term"
 )
@@ -127,14 +127,13 @@ func (c AuthCommand) requestToken(password string) (string, error) {
 		"password": {password},
 	}
 
-	url := fmt.Sprintf("%s/login", c.config.Api.UrlRoot)
-	req, err := http.PostForm(url, data)
+	res, err := api.PostForm(c.config, data, "login")
 	if err != nil {
 		return "", err
 	}
 
 	var response AuthResponse
-	err = json.NewDecoder(req.Body).Decode(&response)
+	err = json.NewDecoder(res.Body).Decode(&response)
 	if err != nil {
 		return "", err
 	}
