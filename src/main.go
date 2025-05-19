@@ -28,6 +28,9 @@ func main() {
 	case "auth":
 		cmd = commands.NewAuthCommand(config)
 
+	case "groups":
+		cmd = commands.NewGroupsCommand(config)
+
 	case "users":
 		cmd = commands.NewUsersCommand(config)
 
