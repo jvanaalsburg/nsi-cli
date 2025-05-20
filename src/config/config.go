@@ -37,7 +37,7 @@ type AuthConfig struct {
 	Token string `toml:"token"`
 }
 
-func (c Config) Save() error {
+func (c Config) SaveConfig() error {
 	data, err := toml.Marshal(c)
 	if err != nil {
 		return err

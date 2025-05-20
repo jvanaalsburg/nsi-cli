@@ -103,31 +103,29 @@ func (c AuthCommand) login() {
 		}
 	}
 
-	token, err := c.requestToken(password)
+	// Attempt to login with the provided email and password.
+	token, err := authenticate(c.config, *c.loginEmail, password)
 	if err != nil {
 		log.Fatalf("Error requesting auth token: %v", err)
 	}
 
-	err = c.saveToken(token)
+	// Update the auth data and save the config file.
+	c.config.Auth.Email = *c.loginEmail
+	c.config.Auth.Token = token
+
+	err = c.config.SaveConfig()
 	if err != nil {
 		log.Fatalf("Error saving config file: %v", err)
 	}
 }
 
-func (c AuthCommand) saveToken(token string) error {
-	c.config.Auth.Email = *c.loginEmail
-	c.config.Auth.Token = token
-
-	return c.config.Save()
-}
-
-func (c AuthCommand) requestToken(password string) (string, error) {
+func authenticate(config config.Config, username, password string) (string, error) {
 	data := url.Values{
-		"username": {*c.loginEmail},
+		"username": {username},
 		"password": {password},
 	}
 
-	res, err := api.PostForm(c.config, data, "login")
+	res, err := api.PostForm(config, data, "login")
 	if err != nil {
 		return "", err
 	}
@@ -155,8 +153,6 @@ func getPassword() (string, error) {
 }
 
 func (c AuthCommand) authStatus() {
-	log.Println("checking auth status...")
-
 	if c.config.Auth.Token == "" {
 		fmt.Printf("Not currently logged in.")
 	} else {
