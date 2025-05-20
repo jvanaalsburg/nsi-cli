@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
@@ -10,21 +11,37 @@ import (
 )
 
 type GroupsCommand struct {
-	config          config.Config
-	listGroupsFlags *flag.FlagSet
-	findGroupsFlags *flag.FlagSet
-	findGroupsId    *string
+	config            config.Config
+	listGroupsFlags   *flag.FlagSet
+	findGroupsFlags   *flag.FlagSet
+	findGroupsId      *string
+	addUserFlags      *flag.FlagSet
+	addUserGroupId    *string
+	addUserUserId     *string
+	addUserRole       *string
+	removeUserFlags   *flag.FlagSet
+	removeUserGroupId *string
+	removeUserUserId  *string
 }
 
 func NewGroupsCommand(config config.Config) GroupsCommand {
 	listGroupsFlags := flag.NewFlagSet("list", flag.ExitOnError)
 	findGroupsFlags := flag.NewFlagSet("find", flag.ExitOnError)
+	addUserFlags := flag.NewFlagSet("add-user", flag.ExitOnError)
+	removeUserFlags := flag.NewFlagSet("remove-user", flag.ExitOnError)
 
 	return GroupsCommand{
-		config:          config,
-		listGroupsFlags: listGroupsFlags,
-		findGroupsFlags: findGroupsFlags,
-		findGroupsId:    findGroupsFlags.String("group-id", "", "The group ID"),
+		config:            config,
+		listGroupsFlags:   listGroupsFlags,
+		findGroupsFlags:   findGroupsFlags,
+		findGroupsId:      findGroupsFlags.String("group-id", "", "The group ID"),
+		addUserFlags:      addUserFlags,
+		addUserGroupId:    addUserFlags.String("group-id", "", "The group ID"),
+		addUserUserId:     addUserFlags.String("user-id", "", "The user ID"),
+		addUserRole:       addUserFlags.String("role", "", "The user role"),
+		removeUserFlags:   removeUserFlags,
+		removeUserGroupId: removeUserFlags.String("group-id", "", "The group ID"),
+		removeUserUserId:  removeUserFlags.String("user-id", "", "The user ID"),
 	}
 }
 
@@ -40,6 +57,12 @@ func (c GroupsCommand) Parse(args []string) error {
 
 	case "find":
 		c.findGroupsFlags.Parse(args[1:])
+
+	case "add-user":
+		c.addUserFlags.Parse(args[1:])
+
+	case "remove-user":
+		c.removeUserFlags.Parse(args[1:])
 
 	default:
 		return fmt.Errorf("Invalid groups action: %s", action)
@@ -61,6 +84,14 @@ func (c GroupsCommand) Exec() {
 		c.findGroup()
 	}
 
+	if c.addUserFlags.Parsed() {
+		c.addUserToGroup()
+	}
+
+	if c.removeUserFlags.Parsed() {
+		c.removeUserFromGroup()
+	}
+
 	return
 }
 
@@ -80,4 +111,38 @@ func (c GroupsCommand) findGroup() {
 	}
 
 	fmt.Printf(api.ResponseStr(group))
+}
+
+func (c GroupsCommand) addUserToGroup() {
+	userId := *c.removeUserUserId
+	groupId := *c.removeUserGroupId
+	role := *c.addUserRole
+
+	data := struct {
+		GroupId string `json:"group_id"`
+		Role    string `json:"role"`
+	}{
+		GroupId: groupId,
+		Role:    role,
+	}
+	payload, _ := json.Marshal(data)
+
+	_, err := api.PostJson(c.config, payload, "users", userId, "groups")
+	if err != nil {
+		log.Fatalf("Error adding user to group: %v", err)
+	}
+
+	fmt.Printf("User added to group")
+}
+
+func (c GroupsCommand) removeUserFromGroup() {
+	userId := *c.removeUserUserId
+	groupId := *c.removeUserGroupId
+
+	_, err := api.Delete(c.config, "users", userId, "groups", groupId)
+	if err != nil {
+		log.Fatalf("Error removing user from group: %v", err)
+	}
+
+	fmt.Printf("User removed from group")
 }

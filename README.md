@@ -72,10 +72,31 @@ docker compose run --rm cli go run main.go auth login -email user@example.com
 
 ### Examples
 
+**Fetching Records**
+
 ```bash
-# Fetch all platform users (must be logged in as an admin).
+# Get all platform users (must be logged in as an admin).
 nsi-cli users list
 
-# Fetch a specific user record.
+# Get a specific user record.
 nsi-cli users find -user-id "00000000-0000-0000-0000-000000000001"
+
+# There are similar commands for getting group records.
+nsi-cli groups list
+nsi-cli groups find -group-id "00000000-0000-0000-0000-000000000001"
+```
+
+**Managing Group Members**
+
+```bash
+# Add a user to a group.
+nsi-cli groups add-user \
+    -group-id "00000000-0000-0000-0000-000000000001" \
+    -user-id "00000000-0000-0000-0000-000000000002" \
+    -role "user"
+
+# Remove a user from a group.
+nsi-cli groups remove-user \
+    -group-id "00000000-0000-0000-0000-000000000001" \
+    -user-id "00000000-0000-0000-0000-000000000002"
 ```
