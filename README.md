@@ -116,3 +116,23 @@ nsi-cli groups remove-user \
     -group-id "00000000-0000-0000-0000-000000000001" \
     -user-id "00000000-0000-0000-0000-000000000002"
 ```
+
+### Generating UUIDs
+
+Test records are typically assigned sequential IDs to make it easier to remember and identify them. However, it can still be cumbersome to write out the UUIDs when making requests, either with `nsi-cli` or another tool like `curl`. The `mkuuid` tool can be used to generate a UUID from a simple numeric ID. For example, the command `mkuuid 1` would return `00000000-0000-0000-0000-000000000001`.
+
+**Examples of Using `mkuuid`**
+
+```bash
+nsi-cli users find -user-id $(mkuuid 1)
+nsi-cli groups find -group-id $(mkuuid 2)
+
+nsi-cli groups remove-user -group-id $(mkuuid 1) -user-id $(mkuuid 2)
+nsi-cli groups add-user -group-id $(mkuuid 1) -user-id $(mkuuid 2) -role "user"
+```
+
+Run the following command to build the `mkuuid` tool.
+
+```bash
+docker compose run --rm cli go build -o bin/mkuuid ./tools/mkuuid
+```
