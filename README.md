@@ -86,6 +86,22 @@ nsi-cli groups list
 nsi-cli groups find -group-id "00000000-0000-0000-0000-000000000001"
 ```
 
+**Creating User Accounts**
+
+```bash
+nsi-cli users create \
+    -email "john.doe@mail.com" \
+    -first-name "John" \
+    -last-name "Doe" \
+    -password "secret"
+
+# A random password will be generated if the password flag is omitted.
+nsi-cli users create \
+    -email "john.doe@mail.com" \
+    -first-name "John" \
+    -last-name "Doe"
+```
+
 **Managing Group Members**
 
 ```bash
